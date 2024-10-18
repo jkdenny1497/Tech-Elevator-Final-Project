@@ -19,6 +19,10 @@
         </router-link>
       </div>
 
+      <div v-if="message" @click="clearMessage" class="cart-message">
+        {{ message }}
+      </div>
+
       <div class="nav-right">
         <div class="search-container">
           <i class="fas fa-search"></i>
@@ -38,9 +42,7 @@
         </router-link>
       </div>
     </nav>
-    <div v-if="message" class="cart-message">
-      {{ message }}
-    </div>
+
     <main>
       <router-view />
     </main>
@@ -55,11 +57,7 @@ import CartView from "./views/CartView.vue";
 
 export default {
   name: "App",
-  data() {
-    return {
-      message: "",
-    };
-  },
+
   computed: {
     searchQuery: {
       get() {
@@ -69,6 +67,10 @@ export default {
         this.$store.commit("SET_SEARCH_QUERY", value);
       },
     },
+    message() {
+      return this.$store.state.message;
+    },
+
     ...mapGetters(["cart"]),
     cartItemCount() {
       let total = 0;
@@ -79,21 +81,15 @@ export default {
     },
   },
   methods: {
-    showCartMessage(msg) {
-      this.message = msg;
-      setTimeout(() => {
-        this.message = "";
-      }, 3000);
-    },
-    addToCart(productId) {
-      this.showCartMessage(`Added product ${productId.name} to cart!`);
+    clearMessage() {
+      this.$store.dispatch("clearMessage");
     },
   },
 };
 </script>
 
 <style scoped>
-/* header {
+header {
   position: fixed;
   top: 0;
   left: 0;
@@ -102,9 +98,9 @@ export default {
   background-color: #fff;
   padding: 20px 0;
   z-index: 1;
-} */
+}
 
-/* nav {
+nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -114,7 +110,7 @@ export default {
   background-color: #f0f0f0;
   padding: 10px;
   z-index: 2;
-} */
+}
 
 .nav-left {
   display: flex;
@@ -141,7 +137,7 @@ main {
 .cart-message {
   display: block;
   position: fixed;
-  top: 20px;
+  top: 220px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;

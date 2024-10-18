@@ -1,7 +1,9 @@
 <template>
   <div>
     <nav>
-      <div v-if="message" class="message">{{ message }}</div>
+      <div v-if="message" @click="clearMessage" class="cart-message">
+        {{ message }}
+      </div>
     </nav>
 
     <div v-if="isLoading">
@@ -14,7 +16,7 @@
       <p>Price: ${{ product.price }}</p>
       <img :src="product.imageName" alt="Product image" />
       <div v-if="isLoggedIn">
-        <button @click="addToCart">Add to Cart</button>
+        <button @click="addToCart(product)">Add to Cart</button>
       </div>
     </div>
     <div v-else>
@@ -43,6 +45,9 @@ export default {
     isLoggedIn() {
       return this.$store.state.token.length > 0;
     },
+    message() {
+      return this.$store.state.message;
+    },
     cartItemCount() {
       let total = 0;
       for (const item of this.cart) {
@@ -68,13 +73,27 @@ export default {
           this.isLoading = false;
         });
     },
-    addToCart() {
-      const productToAdd = {
-        productId: this.product.productId,
-        name: this.product.name,
-        price: this.product.price,
+    addToCart(product) {
+      const item = {
+        productId: product.productId,
+        quantity: 1,
       };
-      this.$store.commit("ADD_TO_CART", productToAdd);
+      axios
+        .post('/cart/items', item)
+        .then(response => {
+          this.$store.dispatch("addToCart", product);
+          this.$store.dispatch(
+            "setMessage",
+            `${product.name} added to cart successfully.`
+          );
+        })
+        .catch((error) => {
+          console.error("Error adding product to cart.", error);
+          this.$store.dispatch("setMessage", "Error adding product to cart.");
+        });
+    },
+    clearMessage() {
+      this.$store.dispatch("clearMessage");
     },
   },
 };
@@ -90,5 +109,4 @@ main {
 nav {
   margin-top: 220px;
 }
-
 </style>

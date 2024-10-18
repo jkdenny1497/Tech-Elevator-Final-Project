@@ -19,13 +19,13 @@
         />
         <div class="description">{{ product.description }}</div>
         <div v-if="isLoggedIn">
-            <div class="cart">
+          <div class="cart">
             <i
-                class="fa fa-cart-plus"
-                aria-hidden="true"
-                @click="addToCart(product, $event)"
+              class="fa fa-cart-plus"
+              aria-hidden="true"
+              @click="addToCart(product, $event)"
             ></i>
-            </div>
+          </div>
         </div>
       </li>
     </ul>
@@ -69,20 +69,41 @@ export default {
         })
         .catch((error) => {
           console.error("Failed to get products", error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     selected(productId) {
       this.$router.push({ name: "product-details", params: { id: productId } });
     },
     addToCart(product, event) {
+      const item = {
+        productId: product.productId,
+        quantity: 1,
+      };
       event.stopPropagation();
-      this.$store.commit("ADD_TO_CART", product);
-      console.log(`Added product ${product.name} to cart!`);
+      axios
+        .post('/cart/items', item)
+        .then((response) => {
+          this.$store.dispatch("addToCart", product);
+          this.$store.dispatch(
+            "setMessage",
+            `${product.name} added to cart successfully.`
+          );
+        })
+        .catch((error) => {
+          console.error("Error adding product to cart.", error);
+          this.$store.dispatch("setMessage", "Error adding product to cart.");
+        });
+    },
+    clearMessage() {
+      this.$store.dispatch("clearMessage");
     },
   },
   created() {
     this.getProducts();
-  }
+  },
 };
 </script>
 

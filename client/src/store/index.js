@@ -9,6 +9,7 @@ export function createStore(currentToken, currentUser) {
       searchQuery: '',
       cart: [],
       items: [],
+      message: "",
       token: currentToken || '',
       user: currentUser || {},
     },
@@ -33,6 +34,12 @@ export function createStore(currentToken, currentUser) {
         else {
           state.cart.push({...product, quantity: 1});
         }
+      },
+      SET_MESSAGE(state, message) {
+        state.message = message;
+      },
+      CLEAR_MESSAGE(state) {
+        state.message = "";
       },
       REMOVE_ITEM_FROM_CART(state, productId) {
         state.cart = state.cart.filter(item => item.productId !== productId);
@@ -63,6 +70,15 @@ export function createStore(currentToken, currentUser) {
           .catch(error => {
             console.error('Error fetching cart:', error);
           });
+      },
+      addToCart({commit}, product) {
+        commit("ADD_TO_CART", product);
+      },
+      setMessage({commit}, message) {
+        commit("SET_MESSAGE", message);
+      },
+      clearMessage({commit}) {
+        commit("CLEAR_MESSAGE");
       },
       removeFromCart({commit}, productId) {
         return axios.delete(`/cart/${productId}`)
